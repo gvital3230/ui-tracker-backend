@@ -3,15 +3,24 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/joho/godotenv"
 	"html"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
-var upgrader = websocket.Upgrader{} // use default options
-
 func echo(w http.ResponseWriter, r *http.Request) {
+	godotenv.Load()
+
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			origin := r.Header.Get("Origin")
+			allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
+			return strings.Contains(allowedOrigins, origin)
+		},
+	}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
