@@ -17,7 +17,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			origin := r.Header.Get("Origin")
-			log.Println("Request Origin:", r.Header.Get("Origin"))
 			allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
 			return strings.Contains(allowedOrigins, origin)
 		},
@@ -52,7 +51,13 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	})
-	http.HandleFunc("/ws", wsHandler)
+
+	hub := newHub()
+	go hub.run()
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(hub, w, r)
+	})
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
