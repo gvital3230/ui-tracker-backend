@@ -1,4 +1,4 @@
-package main
+package ws
 
 import (
 	"encoding/json"
@@ -18,9 +18,11 @@ type TrackMessage struct {
 }
 
 type Client struct {
-	hub  *Hub
-	conn *websocket.Conn
-	send chan []byte
+	hub             *Hub
+	conn            *websocket.Conn
+	send            chan []byte
+	VisitorId       string
+	dashboardClient bool
 }
 
 func (c *Client) readMessage() {
@@ -83,7 +85,7 @@ func (c *Client) writeMessage() {
 
 }
 
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request, dashboardClient bool) {
 	godotenv.Load()
 
 	upgrader := websocket.Upgrader{
@@ -100,7 +102,14 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+
+	client := &Client{
+		hub:             hub,
+		conn:            conn,
+		send:            make(chan []byte, 256),
+		dashboardClient: dashboardClient,
+	}
+
 	client.hub.register <- client
 
 	go client.readMessage()

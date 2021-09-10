@@ -1,4 +1,4 @@
-module github.com/heroku/go-getting-started
+module ui-tracker-backend
 
 go 1.12
 

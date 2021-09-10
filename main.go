@@ -2,45 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
-	"github.com/joho/godotenv"
 	"html"
 	"log"
 	"net/http"
 	"os"
-	"strings"
+	"ui-tracker-backend/internal/ws"
 )
-
-func wsHandler(w http.ResponseWriter, r *http.Request) {
-	godotenv.Load()
-
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			origin := r.Header.Get("Origin")
-			allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
-			return strings.Contains(allowedOrigins, origin)
-		},
-	}
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Print("upgrade:", err)
-		return
-	}
-	defer c.Close()
-	for {
-		mt, message, err := c.ReadMessage()
-		if err != nil {
-			log.Println("read:", err)
-			break
-		}
-		log.Printf("recv: %s", message)
-		err = c.WriteMessage(mt, message)
-		if err != nil {
-			log.Println("write:", err)
-			break
-		}
-	}
-}
 
 func main() {
 	port := os.Getenv("PORT")
@@ -52,11 +19,14 @@ func main() {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	})
 
-	hub := newHub()
-	go hub.run()
+	hub := ws.NewHub()
+	go hub.Run()
 
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(hub, w, r)
+	http.HandleFunc("/ws-public", func(w http.ResponseWriter, r *http.Request) {
+		ws.ServeWs(hub, w, r, false)
+	})
+	http.HandleFunc("/ws-dashboard", func(w http.ResponseWriter, r *http.Request) {
+		ws.ServeWs(hub, w, r, true)
 	})
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
