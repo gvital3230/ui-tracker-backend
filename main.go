@@ -29,5 +29,6 @@ func main() {
 		ws.ServeWs(hub, w, r, true)
 	})
 
+	fmt.Printf("Server started on %v \n", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
