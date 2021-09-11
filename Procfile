@@ -1,1 +1,1 @@
-web: bin/go-getting-started
+web: bin/ui-tracker-backend
