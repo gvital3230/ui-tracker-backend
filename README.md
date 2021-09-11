@@ -1,48 +1,33 @@
+# Sample UI tracker application
 
-# go-getting-started
+This is the part of sample UI tracker service, based on Websocket communication
 
-A barebones Go app, which can easily be deployed to Heroku.
+**While launching demo apps please be aware of Heroku [Free tier Dyno sleeping](https://devcenter.heroku.com/articles/free-dyno-hours#dyno-sleeping)
+so it can be possibly be several seconds delay at initial load**
 
-This application supports the [Getting Started with Go on Heroku](https://devcenter.heroku.com/articles/getting-started-with-go) article - check it out.
+Service consists of three parts
 
-## Running Locally
+### Public application
 
-Make sure you have [Go](http://golang.org/doc/install) version 1.12 or newer and the [Heroku Toolbelt](https://toolbelt.heroku.com/) installed.
+Small JS application which simulates user activity on some e-commerce page. User opens it, starts to scroll.
+After some delay application tracks activity related to every product image and send it to backend server
 
-```sh
-$ git clone https://github.com/heroku/go-getting-started.git
-$ cd go-getting-started
-$ go build -o bin/go-getting-started -v . # or `go build -o bin/go-getting-started.exe -v .` in git bash
-github.com/mattn/go-colorable
-gopkg.in/bluesuncorp/validator.v5
-golang.org/x/net/context
-github.com/heroku/x/hmetrics
-github.com/gin-gonic/gin/render
-github.com/manucorporat/sse
-github.com/heroku/x/hmetrics/onload
-github.com/gin-gonic/gin/binding
-github.com/gin-gonic/gin
-github.com/heroku/go-getting-started
-$ heroku local
-```
+* [Repository location](https://github.com/gvital3230/ui-tracker-public)
+* [Demo app](https://ui-tracker-public.herokuapp.com) - to see, how it works, it is recommended to open it from multiply different browsers or devices
 
-Your app should now be running on [localhost:5000](http://localhost:5000/).
+![](assets/howto.gif)
 
-## Deploying to Heroku
+### Dashboard application
 
-```sh
-$ heroku create
-$ git push heroku main
-$ heroku open
-```
+Shows current active sessions and images that users are seeing right now
 
-or
+* [Repository location](https://github.com/gvital3230/ui-tracker-dashboard)
+* [Demo app](https://ui-tracker-dashboard.herokuapp.com)
 
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+### Backend application
 
+Service that responsible for processing Websocket connection and build current active sessions map
 
-## Documentation
+* Repository location - (this one)
+* Demo app - all settings are made in demo public/dashboard apps
 
-For more information about using Go on Heroku, see these Dev Center articles:
-
-- [Go on Heroku](https://devcenter.heroku.com/categories/go)
