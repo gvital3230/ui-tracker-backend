@@ -19,7 +19,7 @@ func NewHub() *Hub {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		dashboardState: &Dashboard{
-			ActiveSessions: make(map[string]map[string]bool),
+			ActiveSessions: make(DashBoardSessions),
 		},
 	}
 }

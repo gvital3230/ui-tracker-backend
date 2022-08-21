@@ -1,7 +1,11 @@
 package ws
 
+type VisitorId string
+type ItemId string
+type IsVisible bool
+type DashBoardSessions map[VisitorId]map[ItemId]IsVisible
 type Dashboard struct {
-	ActiveSessions map[string]map[string]bool
+	ActiveSessions DashBoardSessions
 }
 
 func (d *Dashboard) Track(m TrackMessage) {
@@ -10,7 +14,7 @@ func (d *Dashboard) Track(m TrackMessage) {
 
 	if m.State {
 		if _, ok := d.ActiveSessions[m.Visitor]; !ok {
-			d.ActiveSessions[m.Visitor] = make(map[string]bool)
+			d.ActiveSessions[m.Visitor] = make(map[ItemId]IsVisible)
 		}
 		d.ActiveSessions[m.Visitor][m.ItemId] = true
 	} else {
@@ -20,7 +24,7 @@ func (d *Dashboard) Track(m TrackMessage) {
 	}
 }
 
-func (d Dashboard) Unregister(visitor string) {
+func (d Dashboard) Unregister(visitor VisitorId) {
 	if _, ok := d.ActiveSessions[visitor]; ok {
 		delete(d.ActiveSessions, visitor)
 	}

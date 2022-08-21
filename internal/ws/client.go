@@ -12,16 +12,16 @@ import (
 
 type TrackMessage struct {
 	Client  *Client
-	Visitor string `json:"visitor"`
-	ItemId  string `json:"item_id"`
-	State   bool   `json:"state"`
+	Visitor VisitorId `json:"visitor"`
+	ItemId  ItemId    `json:"item_id"`
+	State   bool      `json:"state"`
 }
 
 type Client struct {
 	hub             *Hub
 	conn            *websocket.Conn
 	send            chan []byte
-	VisitorId       string
+	VisitorId       VisitorId
 	dashboardClient bool
 }
 
