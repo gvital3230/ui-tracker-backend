@@ -5,20 +5,22 @@ import (
 )
 
 type Hub struct {
-	clients        map[*Client]bool
-	broadcast      chan TrackMessage
-	register       chan *Client
-	unregister     chan *Client
-	dashboardState *Dashboard
+	clients    map[*Client]bool
+	track      chan TrackMessage
+	register   chan *Client
+	unregister chan *Client
+	dashboard  *Dashboard
+	broadcast  chan *Dashboard
 }
 
 func NewHub() *Hub {
 	return &Hub{
 		clients:    make(map[*Client]bool),
-		broadcast:  make(chan TrackMessage),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		dashboardState: &Dashboard{
+		track:      make(chan TrackMessage),
+		broadcast:  make(chan *Dashboard),
+		dashboard: &Dashboard{
 			ActiveSessions: make(DashBoardSessions),
 		},
 	}
@@ -31,26 +33,26 @@ func (h *Hub) Run() {
 			h.clients[client] = true
 		case client := <-h.unregister:
 			if client.VisitorId != "" {
-				h.dashboardState.Unregister(client.VisitorId)
+				h.dashboard.Unregister(client.VisitorId)
 			}
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
 			}
 			h.broadcastDashboardState()
-		case message := <-h.broadcast:
-			h.dashboardState.Track(message)
+		case message := <-h.track:
+			h.dashboard.Track(message)
 			h.broadcastDashboardState()
 		}
 	}
 }
 
 func (h Hub) broadcastDashboardState() {
-	m, _ := json.Marshal(h.dashboardState.ActiveSessions)
-	h.sendBroadcast(m)
+	m, _ := json.Marshal(h.dashboard.ActiveSessions)
+	h.sendDashboardBroadcast(m)
 }
 
-func (h Hub) sendBroadcast(m []byte) {
+func (h Hub) sendDashboardBroadcast(m []byte) {
 	for client := range h.clients {
 		//send active sessions stats only to dashboard users
 		if client.dashboardClient {

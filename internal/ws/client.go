@@ -46,7 +46,7 @@ func (c *Client) readMessage() {
 			log.Printf("unmarsharll error: %v", err)
 			break
 		}
-		c.hub.broadcast <- m
+		c.hub.track <- m
 	}
 }
 
