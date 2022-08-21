@@ -5,7 +5,7 @@ import (
 )
 
 type Hub struct {
-	clients        map[*Client]map[string]bool
+	clients        map[*Client]bool
 	broadcast      chan TrackMessage
 	register       chan *Client
 	unregister     chan *Client
@@ -14,7 +14,7 @@ type Hub struct {
 
 func NewHub() *Hub {
 	return &Hub{
-		clients:    make(map[*Client]map[string]bool),
+		clients:    make(map[*Client]bool),
 		broadcast:  make(chan TrackMessage),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
@@ -28,7 +28,7 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.register:
-			h.clients[client] = make(map[string]bool)
+			h.clients[client] = true
 		case client := <-h.unregister:
 			if client.VisitorId != "" {
 				h.dashboardState.Unregister(client.VisitorId)
@@ -37,15 +37,15 @@ func (h *Hub) Run() {
 				delete(h.clients, client)
 				close(client.send)
 			}
-			h.broadcastActiveState()
+			h.broadcastDashboardState()
 		case message := <-h.broadcast:
 			h.dashboardState.Track(message)
-			h.broadcastActiveState()
+			h.broadcastDashboardState()
 		}
 	}
 }
 
-func (h Hub) broadcastActiveState() {
+func (h Hub) broadcastDashboardState() {
 	m, _ := json.Marshal(h.dashboardState.ActiveSessions)
 	h.sendBroadcast(m)
 }
